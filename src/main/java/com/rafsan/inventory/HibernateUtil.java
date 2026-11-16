@@ -3,6 +3,8 @@ package com.rafsan.inventory;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -23,13 +25,18 @@ public class HibernateUtil {
         try {
             Properties properties = new Properties();
 
-            try (InputStream input = HibernateUtil.class.getClassLoader().getResourceAsStream("application.properties")) {
-
-                if (input == null) {
-                    throw new IOException("application.properties not found");
+            File externalConfigFile = new File("application.properties");
+            if (externalConfigFile.exists() && externalConfigFile.isFile()) {
+                try (InputStream input = new FileInputStream(externalConfigFile)) {
+                    properties.load(input);
                 }
-
-                properties.load(input);
+            } else {
+                try (InputStream input = HibernateUtil.class.getClassLoader().getResourceAsStream("application.properties")) {
+                    if (input == null) {
+                        throw new IOException("application.properties not found");
+                    }
+                    properties.load(input);
+                }
             }
 
             Configuration configuration = new Configuration().configure();
